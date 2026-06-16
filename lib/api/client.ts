@@ -1,4 +1,4 @@
-import { ApiError, type ApiErrorPayload, type ApiResponse } from "@/lib/api/types";
+import { ApiError, type ApiEnvelope, type ApiErrorPayload, type ApiResponse } from "@/lib/api/types";
 import { resolveMockCRMRequest } from "@/lib/api/mock-crm";
 import { resolveMockEventsRequest } from "@/lib/api/mock-events";
 import { resolveMockMarketplaceRequest } from "@/lib/api/mock-marketplace";
@@ -45,10 +45,10 @@ export async function apiRequest<TData>(
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
   });
 
-  const payload = await parseJson<ApiResponse<TData> | ApiErrorPayload>(response);
+  const payload = await parseJson<ApiEnvelope<TData> | ApiErrorPayload>(response);
 
   if (!response.ok) {
-    const errorPayload = payload as ApiErrorPayload | undefined;
+    const errorPayload = normalizeApiErrorPayload(payload);
     throw new ApiError(
       errorPayload?.message ?? "Something went wrong while contacting the Nexus API.",
       response.status,
@@ -56,7 +56,7 @@ export async function apiRequest<TData>(
     );
   }
 
-  return (payload ?? { data: undefined as TData }) as ApiResponse<TData>;
+  return normalizeApiSuccessPayload<TData>(payload);
 }
 
 async function resolveLocalMockRequest<TData>(path: string, method: string, body?: unknown) {
@@ -77,4 +77,41 @@ async function resolveLocalMockRequest<TData>(path: string, method: string, body
   }
 
   return undefined;
+}
+
+function normalizeApiSuccessPayload<TData>(payload: ApiEnvelope<TData> | ApiErrorPayload | undefined): ApiResponse<TData> {
+  if (!payload) {
+    return { data: undefined as TData };
+  }
+
+  if ("success" in payload && payload.success === true) {
+    return {
+      data: payload.data,
+      meta: payload.meta,
+      success: true,
+    };
+  }
+
+  return payload as ApiResponse<TData>;
+}
+
+function normalizeApiErrorPayload<TData>(
+  payload: ApiEnvelope<TData> | ApiErrorPayload | undefined,
+): ApiErrorPayload | undefined {
+  if (!payload) {
+    return undefined;
+  }
+
+  if ("success" in payload && payload.success === false) {
+    return {
+      message: payload.error.message,
+      code: payload.error.code,
+      fieldErrors: payload.error.fields?.reduce<Record<string, string[]>>((accumulator, fieldError) => {
+        accumulator[fieldError.field] = [...(accumulator[fieldError.field] ?? []), fieldError.message];
+        return accumulator;
+      }, {}),
+    };
+  }
+
+  return payload as ApiErrorPayload;
 }
