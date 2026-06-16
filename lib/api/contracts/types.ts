@@ -42,19 +42,19 @@ export interface PaginationMeta {
   hasPreviousPage: boolean;
 }
 
-export interface ApiSuccessResponse<TData, TMeta extends Record<string, unknown> = Record<string, unknown>> {
+export interface ApiSuccessResponse<TData, TMeta = Record<string, unknown>> {
   success: true;
   data: TData;
   meta?: ApiMeta & TMeta;
 }
 
-export interface PaginatedApiSuccessResponse<TData> extends ApiSuccessResponse<TData[]> {
+export type PaginatedApiSuccessResponse<TData> = ApiSuccessResponse<TData[], { pagination: PaginationMeta }> & {
   meta: ApiMeta & {
     pagination: PaginationMeta;
   };
-}
+};
 
-export type ApiContractResponse<TData, TMeta extends Record<string, unknown> = Record<string, unknown>> =
+export type ApiContractResponse<TData, TMeta = Record<string, unknown>> =
   | ApiSuccessResponse<TData, TMeta>
   | ApiErrorResponse;
 
