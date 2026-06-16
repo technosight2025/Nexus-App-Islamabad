@@ -1,0 +1,344 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CLIENT
+  PROFESSIONAL
+  VENUE_OWNER
+  RENTAL_OWNER
+  ADMIN
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum EventStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum MediaStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL_SENT
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum LeadSource {
+  MARKETPLACE
+  REFERRAL
+  WEBSITE
+  EVENT
+  MANUAL
+}
+
+enum PaymentStatus {
+  PENDING
+  REQUIRES_ACTION
+  PAID
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentType {
+  DEPOSIT
+  INSTALLMENT
+  FULL_PAYMENT
+  PAYOUT
+}
+
+enum MessageChannel {
+  SYSTEM
+  CLIENT_PROFESSIONAL
+  EVENT_GUEST
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users    User[]
+  listings Listing[]
+  bookings Booking[]
+  events   Event[]
+  leads    Lead[]
+  payments Payment[]
+  messages Message[]
+
+  @@map("tenants")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  tenantId  String?
+  clerkId   String   @unique
+  name      String
+  email     String   @unique
+  avatarUrl String?
+  role      UserRole @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant               Tenant?   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  ownedListings        Listing[] @relation("ListingOwner")
+  clientBookings       Booking[] @relation("ClientBookings")
+  professionalBookings Booking[] @relation("ProfessionalBookings")
+  createdEvents        Event[]   @relation("EventOwner")
+  uploadedMedia        Media[]   @relation("MediaUploader")
+  ownedLeads           Lead[]    @relation("LeadOwner")
+  sentMessages         Message[] @relation("MessageSender")
+
+  @@index([tenantId])
+  @@index([role])
+  @@map("users")
+}
+
+model Listing {
+  id            String        @id @default(cuid())
+  tenantId      String
+  ownerId       String
+  title         String
+  description   String
+  category      String
+  city          String
+  basePrice     Decimal       @db.Decimal(12, 2)
+  currency      String        @default("PKR")
+  coverImageUrl String?
+  status        ListingStatus @default(DRAFT)
+  averageRating Decimal       @default(0) @db.Decimal(3, 2)
+  reviewCount   Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  owner    User      @relation("ListingOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@index([tenantId, status])
+  @@index([category])
+  @@index([city])
+  @@map("listings")
+}
+
+model Booking {
+  id             String        @id @default(cuid())
+  tenantId       String
+  listingId      String
+  clientId       String
+  professionalId String
+  eventDate      DateTime
+  status         BookingStatus @default(PENDING)
+  totalAmount    Decimal       @db.Decimal(12, 2)
+  currency       String        @default("PKR")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  listing      Listing   @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  client       User      @relation("ClientBookings", fields: [clientId], references: [id], onDelete: Restrict)
+  professional User      @relation("ProfessionalBookings", fields: [professionalId], references: [id], onDelete: Restrict)
+  event        Event?
+  payments     Payment[]
+  messages     Message[]
+
+  @@index([tenantId, status])
+  @@index([clientId])
+  @@index([professionalId])
+  @@map("bookings")
+}
+
+model Event {
+  id            String      @id @default(cuid())
+  tenantId      String
+  ownerId       String
+  bookingId     String?     @unique
+  title         String
+  description   String?
+  venue         String
+  city          String
+  eventDate     DateTime
+  status        EventStatus @default(SCHEDULED)
+  coverImageUrl String?
+  qrToken       String?     @unique
+  qrUploadUrl   String?
+  qrExpiresAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  owner   User    @relation("EventOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  media   Media[]
+
+  @@index([tenantId, status])
+  @@index([eventDate])
+  @@map("events")
+}
+
+model Media {
+  id           String      @id @default(cuid())
+  eventId      String
+  uploaderId   String?
+  guestName    String?
+  url          String
+  thumbnailUrl String?
+  type         MediaType
+  caption      String?
+  status       MediaStatus @default(PENDING_REVIEW)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  event    Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  uploader User? @relation("MediaUploader", fields: [uploaderId], references: [id], onDelete: SetNull)
+
+  @@index([eventId, status])
+  @@index([type])
+  @@map("media")
+}
+
+model Lead {
+  id              String     @id @default(cuid())
+  tenantId        String
+  ownerId         String
+  stageId         String
+  name            String
+  email           String?
+  phone           String?
+  companyName     String?
+  eventType       String?
+  eventDate       DateTime?
+  estimatedValue  Decimal    @default(0) @db.Decimal(12, 2)
+  currency        String     @default("PKR")
+  source          LeadSource @default(MANUAL)
+  status          LeadStatus @default(NEW)
+  lastContactedAt DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  owner    User      @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  notes    LeadNote[]
+  tasks    LeadTask[]
+  messages Message[]
+
+  @@index([tenantId, status])
+  @@index([ownerId])
+  @@index([stageId])
+  @@map("leads")
+}
+
+model LeadNote {
+  id        String   @id @default(cuid())
+  leadId    String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@map("lead_notes")
+}
+
+model LeadTask {
+  id          String   @id @default(cuid())
+  leadId      String
+  assigneeId  String
+  title       String
+  description String?
+  dueAt       DateTime?
+  status      String   @default("todo")
+  priority    String   @default("medium")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([assigneeId])
+  @@map("lead_tasks")
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  tenantId          String
+  bookingId         String?
+  userId            String?
+  provider          String
+  providerPaymentId String?
+  type              PaymentType
+  status            PaymentStatus @default(PENDING)
+  amount            Decimal       @db.Decimal(12, 2)
+  currency          String        @default("PKR")
+  metadata          Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, status])
+  @@index([bookingId])
+  @@map("payments")
+}
+
+model Message {
+  id          String         @id @default(cuid())
+  tenantId    String
+  senderId    String?
+  bookingId   String?
+  leadId      String?
+  channel     MessageChannel
+  body        String
+  metadata    Json?
+  createdAt   DateTime       @default(now())
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sender  User?    @relation("MessageSender", fields: [senderId], references: [id], onDelete: SetNull)
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  lead    Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, channel])
+  @@index([bookingId])
+  @@index([leadId])
+  @@map("messages")
+}

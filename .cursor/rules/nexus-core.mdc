@@ -1,0 +1,60 @@
+---
+alwaysApply: true
+---
+
+You are building a production-grade SaaS called Nexus.
+
+## STACK
+
+- Next.js 15 (App Router ONLY)
+- TypeScript strict mode
+- Tailwind CSS
+- React Query for server state
+- Zustand for client state
+
+## ARCHITECTURE RULES
+
+- Use modular architecture (/modules)
+- Separate UI, business logic, and API layers strictly
+- No business logic inside components
+- No hardcoded data anywhere
+
+## NEXT.JS RULES
+
+- Always use Server Components by default
+- Use "use client" only when required
+- Never use pages/ directory
+- Fetch data in Server Components using async/await
+- Avoid useEffect for data fetching
+
+## CODING RULES
+
+- Always write reusable components
+- Prefer composition over duplication
+- Keep functions small and single-purpose
+- Use TypeScript interfaces for all data models
+
+## API RULES
+
+- All API calls must go through /lib/api
+- No direct fetch inside UI components
+
+## UI RULES
+
+- Card-based design system only
+- Mobile-first responsive design
+- Search-first UX (Airbnb style)
+
+## BUSINESS LOGIC RULES
+
+- Marketplace, CRM, Bookings, Events are separate modules
+- Modules must NOT depend on each other directly
+- Shared logic goes in /lib or /services
+
+## QUALITY RULE
+
+Before finalizing code:
+- Ensure no duplication
+- Ensure correct folder placement
+- Ensure TypeScript safety
+- Ensure clean separation of concerns
