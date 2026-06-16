@@ -1,83 +1,60 @@
 ---
-description: Core architecture and implementation rules for Nexus.
-globs:
-  - "**/*"
 alwaysApply: true
 ---
 
-# Nexus Core Rules
+You are building a production-grade SaaS called Nexus.
 
-Nexus is a production-grade, multi-tenant creative production SaaS platform for Pakistan. Preserve the architecture and boundaries below for every change.
+## STACK
 
-## Tech Stack
+- Next.js 15 (App Router ONLY)
+- TypeScript strict mode
+- Tailwind CSS
+- React Query for server state
+- Zustand for client state
 
-- Use Next.js 15 with the App Router only.
-- Use TypeScript in strict mode.
-- Use Tailwind CSS for styling.
-- Use React Query for server state.
-- Use Zustand only for client state that cannot stay local to a component.
-- Keep the architecture PostgreSQL-ready. Do not add mock shortcuts inside UI or business modules.
+## ARCHITECTURE RULES
 
-## Folder Boundaries
+- Use modular architecture (/modules)
+- Separate UI, business logic, and API layers strictly
+- No business logic inside components
+- No hardcoded data anywhere
 
-- `/app` contains routes only.
-- `/components` contains pure reusable UI components only.
-- `/modules` contains business logic only.
-- `/lib` contains shared utilities, API wrappers, auth helpers, DB helpers, and cross-cutting infrastructure.
-- `/hooks` contains shared cross-feature hooks only.
-- `/store` contains Zustand state only.
-- `/services` contains cross-module service integrations only.
-- `/types` contains shared TypeScript interfaces.
-- `/prisma` contains database schema/migration related files when introduced.
+## NEXT.JS RULES
 
-## Module Rules
+- Always use Server Components by default
+- Use "use client" only when required
+- Never use pages/ directory
+- Fetch data in Server Components using async/await
+- Avoid useEffect for data fetching
 
-Business features must live in `/modules`:
+## CODING RULES
 
-- `marketplace`
-- `listings`
-- `bookings`
-- `crm`
-- `events`
-- `payments`
-- `admin`
+- Always write reusable components
+- Prefer composition over duplication
+- Keep functions small and single-purpose
+- Use TypeScript interfaces for all data models
 
-Modules must not import directly from other modules. If logic must be shared, move it into `/lib`, `/services`, or `/types`.
+## API RULES
 
-## API and Data Rules
+- All API calls must go through /lib/api
+- No direct fetch inside UI components
 
-- All API calls must go through `/lib/api`.
-- Do not call `fetch` directly from components or modules.
-- Use typed API response shapes.
-- Handle loading and error states in reusable structures.
-- Do not hardcode feature data in UI components. Local mocks, when needed, must live behind `/lib/api`.
-- Use typed interfaces for domain models.
+## UI RULES
 
-## Next.js Rules
+- Card-based design system only
+- Mobile-first responsive design
+- Search-first UX (Airbnb style)
 
-- Prefer Server Components.
-- Use `"use client"` only for interactivity, browser APIs, React Query hooks, local state, or event handlers.
-- Do not fetch data inside client components with `useEffect`.
-- For interactive pages, prefetch on the server with React Query and hydrate into a small client boundary.
+## BUSINESS LOGIC RULES
 
-## UI Rules
+- Marketplace, CRM, Bookings, Events are separate modules
+- Modules must NOT depend on each other directly
+- Shared logic goes in /lib or /services
 
-- Use card-based layouts.
-- Build mobile-first responsive interfaces.
-- Keep UI clean, minimal, and SaaS-oriented.
-- Marketplace UI should follow Airbnb-style grids and Fiverr-style professional listing patterns.
-- Dashboard UI should prioritize clarity, density control, and composable panels.
-- Use Tailwind only for styling.
+## QUALITY RULE
 
-## Implementation Rules
-
-- Keep components small and composable.
-- Keep business logic out of route files and UI components.
-- Avoid duplication unless extracting an abstraction would be premature.
-- Maintain strict TypeScript safety.
-- Add validation at API/service boundaries and form boundaries.
-- Keep route groups aligned with the established structure:
-  - `/app/(public)`
-  - `/app/(dashboard)`
-  - `/app/(auth)`
-  - `/app/(events)`
+Before finalizing code:
+- Ensure no duplication
+- Ensure correct folder placement
+- Ensure TypeScript safety
+- Ensure clean separation of concerns
