@@ -108,7 +108,7 @@ export function ListingDetailContent({ listingId }: ListingDetailContentProps) {
                 <span className="text-sm text-muted">Starting from</span>
                 <span className="text-3xl font-bold text-foreground">{priceFormatter.format(listing.basePrice)}</span>
               </div>
-              <Link className="grid" href="/login">
+              <Link className="grid" href={`/booking/${listing.id}`}>
                 <Button size="lg">Request to book</Button>
               </Link>
               <Link className="grid" href="/marketplace">
@@ -117,7 +117,7 @@ export function ListingDetailContent({ listingId }: ListingDetailContentProps) {
                 </Button>
               </Link>
               <p className="text-xs leading-5 text-muted">
-                You will be asked to sign in to confirm availability and complete your booking.
+                Choose a package and share your event details to confirm your booking.
               </p>
             </CardContent>
           </Card>
