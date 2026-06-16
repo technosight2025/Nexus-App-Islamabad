@@ -1,5 +1,6 @@
 export { EventGallery } from "@/components/events/event-gallery";
 export { EventForm } from "@/components/events/event-form";
+export { EventPageContent } from "@/components/events/event-page-content";
 export { EventSettings } from "@/components/events/event-settings";
 export type { EventSettingsValue } from "@/components/events/event-settings";
 export { MediaGrid } from "@/components/events/media-grid";
