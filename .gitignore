@@ -32,3 +32,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# clerk keyless-mode local cache (can contain secrets)
+/.clerk/
