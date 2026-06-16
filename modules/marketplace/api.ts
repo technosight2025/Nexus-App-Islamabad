@@ -4,7 +4,7 @@ import { buildMarketplaceSearchParams } from "@/modules/marketplace/utils";
 
 const MARKETPLACE_BASE_PATH = "/api/marketplace";
 
-export interface MarketplaceApiLoading<TData> {
+export interface MarketplaceApiLoading {
   data: null;
   error: null;
   isLoading: true;
@@ -27,11 +27,11 @@ export interface MarketplaceApiFailure {
 }
 
 export type MarketplaceApiState<TData> =
-  | MarketplaceApiLoading<TData>
+  | MarketplaceApiLoading
   | MarketplaceApiSuccess<TData>
   | MarketplaceApiFailure;
 
-export function createMarketplaceLoadingState<TData>(): MarketplaceApiLoading<TData> {
+export function createMarketplaceLoadingState(): MarketplaceApiLoading {
   return {
     data: null,
     error: null,
