@@ -1,5 +1,6 @@
 import { ApiError, type ApiErrorPayload, type ApiResponse } from "@/lib/api/types";
 import { resolveMockCRMRequest } from "@/lib/api/mock-crm";
+import { resolveMockEventsRequest } from "@/lib/api/mock-events";
 import { resolveMockMarketplaceRequest } from "@/lib/api/mock-marketplace";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
@@ -69,6 +70,10 @@ async function resolveLocalMockRequest<TData>(path: string, method: string, body
 
   if (path.startsWith("/api/crm")) {
     return resolveMockCRMRequest<TData>(path, method, body);
+  }
+
+  if (path.startsWith("/api/events")) {
+    return resolveMockEventsRequest<TData>(path, method, body);
   }
 
   return undefined;
