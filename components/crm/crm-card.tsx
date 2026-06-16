@@ -10,6 +10,7 @@ interface CRMCardProps {
   isDragging?: boolean;
   onDragStart?: (leadId: string) => void;
   onDragEnd?: () => void;
+  onSelect?: (leadId: string) => void;
 }
 
 const valueFormatter = new Intl.NumberFormat("en-PK", {
@@ -18,7 +19,7 @@ const valueFormatter = new Intl.NumberFormat("en-PK", {
   style: "currency",
 });
 
-export function CRMCard({ lead, isDragging = false, onDragStart, onDragEnd }: CRMCardProps) {
+export function CRMCard({ lead, isDragging = false, onDragStart, onDragEnd, onSelect }: CRMCardProps) {
   function handleDragStart(event: DragEvent<HTMLDivElement>) {
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", lead.id);
@@ -32,8 +33,17 @@ export function CRMCard({ lead, isDragging = false, onDragStart, onDragEnd }: CR
         isDragging ? "border-accent opacity-60 ring-4 ring-accent/10" : null,
       )}
       draggable
+      onClick={() => onSelect?.(lead.id)}
       onDragEnd={onDragEnd}
       onDragStart={handleDragStart}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect?.(lead.id);
+        }
+      }}
+      role={onSelect ? "button" : undefined}
+      tabIndex={onSelect ? 0 : undefined}
     >
       <div className="grid gap-4">
         <div className="grid gap-2">

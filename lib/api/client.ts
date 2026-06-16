@@ -1,4 +1,5 @@
 import { ApiError, type ApiErrorPayload, type ApiResponse } from "@/lib/api/types";
+import { resolveMockCRMRequest } from "@/lib/api/mock-crm";
 import { resolveMockMarketplaceRequest } from "@/lib/api/mock-marketplace";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
@@ -25,7 +26,7 @@ export async function apiRequest<TData>(
   options: RequestOptions = {},
 ): Promise<ApiResponse<TData>> {
   const method = options.method ?? "GET";
-  const mockResponse = await resolveLocalMockRequest<TData>(path, method);
+  const mockResponse = await resolveLocalMockRequest<TData>(path, method, options.body);
 
   if (mockResponse) {
     return mockResponse;
@@ -57,10 +58,18 @@ export async function apiRequest<TData>(
   return (payload ?? { data: undefined as TData }) as ApiResponse<TData>;
 }
 
-async function resolveLocalMockRequest<TData>(path: string, method: string) {
-  if (API_BASE_URL || !path.startsWith("/api/marketplace")) {
+async function resolveLocalMockRequest<TData>(path: string, method: string, body?: unknown) {
+  if (API_BASE_URL) {
     return undefined;
   }
 
-  return resolveMockMarketplaceRequest<TData>(path, method);
+  if (path.startsWith("/api/marketplace")) {
+    return resolveMockMarketplaceRequest<TData>(path, method);
+  }
+
+  if (path.startsWith("/api/crm")) {
+    return resolveMockCRMRequest<TData>(path, method, body);
+  }
+
+  return undefined;
 }

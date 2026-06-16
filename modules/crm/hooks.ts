@@ -37,11 +37,13 @@ export const crmQueryOptions = {
     queryOptions({
       queryKey: crmQueryKeys.lead(id),
       queryFn: () => crmService.getLead(id),
+      enabled: id.trim().length > 0,
     }),
   notes: (leadId: string) =>
     queryOptions({
       queryKey: crmQueryKeys.notes(leadId),
       queryFn: () => crmService.listLeadNotes(leadId),
+      enabled: leadId.trim().length > 0,
     }),
   pipelineStages: () =>
     queryOptions({
@@ -52,6 +54,7 @@ export const crmQueryOptions = {
     queryOptions({
       queryKey: crmQueryKeys.tasks(leadId),
       queryFn: () => crmService.listLeadTasks(leadId),
+      enabled: leadId.trim().length > 0,
     }),
 };
 
@@ -63,11 +66,11 @@ export function useCRMLeads(filters: LeadFilters = {}) {
   return useQuery(crmQueryOptions.leads(filters));
 }
 
-export function useCRMLead(id: string) {
+export function useCRMLead(id = "") {
   return useQuery(crmQueryOptions.lead(id));
 }
 
-export function useCRMLeadNotes(leadId: string) {
+export function useCRMLeadNotes(leadId = "") {
   return useQuery(crmQueryOptions.notes(leadId));
 }
 
@@ -75,7 +78,7 @@ export function useCRMPipelineStages() {
   return useQuery(crmQueryOptions.pipelineStages());
 }
 
-export function useCRMLeadTasks(leadId: string) {
+export function useCRMLeadTasks(leadId = "") {
   return useQuery(crmQueryOptions.tasks(leadId));
 }
 

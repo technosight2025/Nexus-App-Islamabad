@@ -9,6 +9,7 @@ interface CRMBoardProps {
   leads: Lead[];
   stages?: CRMKanbanStage[];
   onLeadStageChange?: (leadId: string, stageId: string) => void | Promise<void>;
+  onLeadSelect?: (leadId: string) => void;
 }
 
 export const defaultCRMStages: CRMKanbanStage[] = [
@@ -44,7 +45,7 @@ export const defaultCRMStages: CRMKanbanStage[] = [
   },
 ];
 
-export function CRMBoard({ leads, stages = defaultCRMStages, onLeadStageChange }: CRMBoardProps) {
+export function CRMBoard({ leads, stages = defaultCRMStages, onLeadStageChange, onLeadSelect }: CRMBoardProps) {
   const [activeLeadId, setActiveLeadId] = useState<string>();
   const [activeStageId, setActiveStageId] = useState<string>();
   const [stageOverrides, setStageOverrides] = useState<Record<string, string>>({});
@@ -127,6 +128,7 @@ export function CRMBoard({ leads, stages = defaultCRMStages, onLeadStageChange }
             onDragEnter={setActiveStageId}
             onDragStart={setActiveLeadId}
             onDropLead={handleDropLead}
+            onLeadSelect={onLeadSelect}
             stage={stage}
           />
         ))}

@@ -21,6 +21,7 @@ interface CRMColumnProps {
   onDragEnter: (stageId: string) => void;
   onDragStart: (leadId: string) => void;
   onDropLead: (leadId: string, stageId: string) => void;
+  onLeadSelect?: (leadId: string) => void;
   stage: CRMKanbanStage;
 }
 
@@ -32,6 +33,7 @@ export function CRMColumn({
   onDragEnter,
   onDragStart,
   onDropLead,
+  onLeadSelect,
   stage,
 }: CRMColumnProps) {
   function handleDragOver(event: DragEvent<HTMLDivElement>) {
@@ -75,6 +77,7 @@ export function CRMColumn({
               lead={lead}
               onDragEnd={onDragEnd}
               onDragStart={onDragStart}
+              onSelect={onLeadSelect}
             />
           ))
         ) : (
