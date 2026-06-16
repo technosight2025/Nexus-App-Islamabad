@@ -16,7 +16,7 @@ const priceFormatter = new Intl.NumberFormat("en-PK", {
 export function ListingCard({ listing }: ListingCardProps) {
   return (
     <Card className="group overflow-hidden transition hover:-translate-y-0.5 hover:shadow-lg">
-      <Link className="grid h-full" href={`/marketplace/listings/${listing.id}`}>
+      <Link className="grid h-full" href={`/listings/${listing.id}`}>
         <div className="relative aspect-[4/3] overflow-hidden bg-muted-surface">
           {listing.coverImageUrl ? (
             <Image
