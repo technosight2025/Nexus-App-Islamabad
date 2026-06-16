@@ -3,6 +3,8 @@ export type EventGuestStatus = "invited" | "registered" | "checked_in" | "blocke
 export type EventMediaType = "image" | "video";
 export type EventMediaStatus = "pending_review" | "approved" | "rejected";
 export type QRCodeStatus = "active" | "paused" | "expired";
+export type EventRealtimeAction = "created" | "updated" | "deleted";
+export type EventRealtimeEntity = "event" | "media" | "guest" | "qr_code";
 
 export interface Event {
   id: string;
@@ -96,4 +98,23 @@ export interface CreateEventGuestInput {
 export interface CreateQRCodeInput {
   eventId: string;
   expiresAt?: string;
+}
+
+export interface UploadMediaInput {
+  eventId: string;
+  uploaderId?: string;
+  guestId?: string;
+  url: string;
+  thumbnailUrl?: string;
+  type: EventMediaType;
+  caption?: string;
+}
+
+export interface EventRealtimeUpdate<TPayload = Event | EventMedia | EventGuest | QRCode> {
+  id: string;
+  eventId: string;
+  entity: EventRealtimeEntity;
+  action: EventRealtimeAction;
+  payload: TPayload;
+  occurredAt: string;
 }

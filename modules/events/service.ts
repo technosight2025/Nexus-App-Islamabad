@@ -1,13 +1,14 @@
 import {
   createEvent,
   createEventGuest,
-  createEventQRCode,
+  generateQRCode as generateQRCodeRequest,
   getEventById,
   getEventGuests,
   getEventMedia,
   getEventQRCode,
   getEvents,
   updateEvent,
+  uploadMedia as uploadMediaRequest,
   type EventsApiState,
 } from "@/modules/events/api";
 import type {
@@ -21,6 +22,7 @@ import type {
   EventMedia,
   QRCode,
   UpdateEventInput,
+  UploadMediaInput,
 } from "@/modules/events/types";
 
 export const eventsService = {
@@ -44,6 +46,10 @@ export const eventsService = {
     return unwrapEventsState(await getEventMedia(eventId));
   },
 
+  async uploadMedia(data: UploadMediaInput): Promise<EventMedia> {
+    return unwrapEventsState(await uploadMediaRequest(data));
+  },
+
   async listEventGuests(eventId: string): Promise<EventGuest[]> {
     return unwrapEventsState(await getEventGuests(eventId));
   },
@@ -56,8 +62,8 @@ export const eventsService = {
     return unwrapEventsState(await getEventQRCode(eventId));
   },
 
-  async createEventQRCode(data: CreateQRCodeInput): Promise<QRCode> {
-    return unwrapEventsState(await createEventQRCode(data));
+  async generateQRCode(data: CreateQRCodeInput): Promise<QRCode> {
+    return unwrapEventsState(await generateQRCodeRequest(data));
   },
 };
 

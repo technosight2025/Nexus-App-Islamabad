@@ -10,6 +10,7 @@ import type {
   EventMedia,
   QRCode,
   UpdateEventInput,
+  UploadMediaInput,
 } from "@/modules/events/types";
 
 const EVENTS_BASE_PATH = "/api/events";
@@ -117,6 +118,21 @@ export async function getEventMedia(eventId: string): Promise<EventsApiState<Eve
   );
 }
 
+export async function uploadMedia(data: UploadMediaInput): Promise<EventsApiState<EventMedia>> {
+  const validationError = validateUploadMediaInput(data);
+
+  if (validationError) {
+    return validationError;
+  }
+
+  return executeEventsRequest(
+    apiRequest<EventMedia>(`${EVENTS_BASE_PATH}/${encodeURIComponent(data.eventId)}/media`, {
+      body: data,
+      method: "POST",
+    }),
+  );
+}
+
 export async function getEventGuests(eventId: string): Promise<EventsApiState<EventGuest[]>> {
   const normalizedEventId = eventId.trim();
 
@@ -162,7 +178,7 @@ export async function getEventQRCode(eventId: string): Promise<EventsApiState<QR
   );
 }
 
-export async function createEventQRCode(data: CreateQRCodeInput): Promise<EventsApiState<QRCode>> {
+export async function generateQRCode(data: CreateQRCodeInput): Promise<EventsApiState<QRCode>> {
   if (!data.eventId.trim()) {
     return createEventsFailure("Event id is required to create a QR code.", 400);
   }
@@ -173,6 +189,10 @@ export async function createEventQRCode(data: CreateQRCodeInput): Promise<Events
       method: "POST",
     }),
   );
+}
+
+export async function createEventQRCode(data: CreateQRCodeInput): Promise<EventsApiState<QRCode>> {
+  return generateQRCode(data);
 }
 
 async function executeEventsRequest<TData>(request: Promise<ApiResponse<TData>>): Promise<EventsApiState<TData>> {
@@ -231,6 +251,22 @@ function validateCreateEventInput(data: CreateEventInput): EventsApiFailure | un
 
   if (!data.eventDate.trim()) {
     return createEventsFailure("Event date is required.", 400);
+  }
+
+  return undefined;
+}
+
+function validateUploadMediaInput(data: UploadMediaInput): EventsApiFailure | undefined {
+  if (!data.eventId.trim()) {
+    return createEventsFailure("Event id is required to upload media.", 400);
+  }
+
+  if (!data.url.trim()) {
+    return createEventsFailure("Media URL is required.", 400);
+  }
+
+  if (data.type !== "image" && data.type !== "video") {
+    return createEventsFailure("Media type must be image or video.", 400);
   }
 
   return undefined;

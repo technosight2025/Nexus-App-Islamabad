@@ -6,6 +6,7 @@ import type {
   CreateQRCodeInput,
   EventFilters,
   UpdateEventInput,
+  UploadMediaInput,
 } from "@/modules/events/types";
 
 interface UpdateEventVariables {
@@ -111,9 +112,37 @@ export function useCreateEventQRCode() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateQRCodeInput) => eventsService.createEventQRCode(data),
+    mutationFn: (data: CreateQRCodeInput) => eventsService.generateQRCode(data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: eventsQueryKeys.all });
+    },
+  });
+}
+
+export function useUploadEventMedia() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: UploadMediaInput) => eventsService.uploadMedia(data),
+    onSuccess: async (media) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: eventsQueryKeys.event(media.eventId) }),
+        queryClient.invalidateQueries({ queryKey: eventsQueryKeys.media(media.eventId) }),
+      ]);
+    },
+  });
+}
+
+export function useGenerateEventQRCode() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateQRCodeInput) => eventsService.generateQRCode(data),
+    onSuccess: async (qrCode) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: eventsQueryKeys.event(qrCode.eventId) }),
+        queryClient.invalidateQueries({ queryKey: eventsQueryKeys.qrCode(qrCode.eventId) }),
+      ]);
     },
   });
 }
