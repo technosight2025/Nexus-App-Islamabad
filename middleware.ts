@@ -12,11 +12,11 @@ const isAuthRoute = createRouteMatcher(["/login(.*)", "/register(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
-  const authState = await auth();
 
   if (isDashboardRoute(request)) {
-    await authState.protect();
+    await auth.protect();
 
+    const authState = await auth();
     const metadata = authState.sessionClaims?.metadata as NexusUserMetadata | undefined;
     const role = resolveNexusRole(metadata?.role);
 
@@ -25,8 +25,10 @@ export default clerkMiddleware(async (auth, request) => {
     }
   }
 
+  const authState = await auth();
+
   if (isAuthRoute(request) && authState.userId) {
-    return NextResponse.redirect(new URL("/professional", request.url));
+    return NextResponse.redirect(new URL("/professional/crm", request.url));
   }
 
   return NextResponse.next();

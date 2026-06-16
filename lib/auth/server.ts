@@ -31,6 +31,7 @@ export async function requireNexusUser(): Promise<NexusAuthenticatedUser> {
   if (!user) {
     const authState = await auth();
     authState.redirectToSignIn();
+    throw new Error("Authentication required.");
   }
 
   return user;
