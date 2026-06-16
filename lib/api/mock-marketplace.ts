@@ -204,11 +204,11 @@ export async function resolveMockMarketplaceRequest<TData>(
   const pathname = url.pathname;
 
   if (pathname === "/api/marketplace/categories") {
-    return asResponse(categories);
+    return asResponse<TData>(categories);
   }
 
   if (pathname === "/api/marketplace/listings") {
-    return asResponse(searchMockListings(url.searchParams));
+    return asResponse<TData>(searchMockListings(url.searchParams));
   }
 
   if (pathname.startsWith("/api/marketplace/listings/")) {
@@ -222,7 +222,7 @@ export async function resolveMockMarketplaceRequest<TData>(
       });
     }
 
-    return asResponse(listing);
+    return asResponse<TData>(listing);
   }
 
   return undefined;
@@ -296,8 +296,8 @@ function searchMockListings(params: URLSearchParams): MockSearchResult {
   };
 }
 
-function asResponse<TData>(data: TData): ApiResponse<TData> {
-  return { data };
+function asResponse<TData>(data: unknown): ApiResponse<TData> {
+  return { data: data as TData };
 }
 
 function normalizeText(value: string | null) {
