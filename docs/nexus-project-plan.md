@@ -36,7 +36,7 @@ Already established:
 
 ## 3. Project Management Rule
 
-We will work in controlled approval gates.
+We will work in controlled approval gates with standing approval for the recommended path.
 
 For every major step:
 
@@ -44,12 +44,12 @@ For every major step:
 2. Explain why it matters.
 3. List the implementation options.
 4. Recommend one option.
-5. Ask for approval.
-6. Build only the approved step.
+5. Proceed with the recommended option unless the owner explicitly overrides it.
+6. Pause for approval when a step has major cost, vendor, security, or launch-risk impact.
 7. Verify quality.
-8. Report completion and ask for the next approval.
+8. Report completion and identify the next recommended step.
 
-No major foundation decision should be implemented without approval.
+The owner has approved using the recommended option by default. Non-recommended paths, vendor changes, paid infrastructure, production deployment, schema-destructive changes, and security-sensitive changes still require explicit confirmation.
 
 ## 4. Phase Roadmap
 
@@ -390,8 +390,9 @@ Recommended implementation direction:
 
 | Date | Decision | Status |
 | --- | --- | --- |
-| 2026-06-16 | Use approval-gated project management flow | Proposed |
-| 2026-06-16 | Next recommended phase is Auth Foundation | Proposed |
+| 2026-06-16 | Use approval-gated project management flow | Approved |
+| 2026-06-16 | Next recommended phase is Auth Foundation | Completed |
+| 2026-06-16 | Proceed with recommended option by default unless explicitly overridden | Approved |
 
 ## 8. Approval Checklist
 
@@ -400,7 +401,7 @@ Before each step starts, confirm:
 - Scope is clear
 - Files/folders are correct
 - Risks are understood
-- Recommended option is approved
+- Recommended option is documented
 - Verification commands are defined
 
 Before each step is considered complete:

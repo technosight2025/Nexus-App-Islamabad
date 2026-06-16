@@ -1,4 +1,5 @@
 import { ApiError, type ApiEnvelope, type ApiErrorPayload, type ApiResponse } from "@/lib/api/types";
+import { resolveMockBookingsRequest } from "@/lib/api/mock-bookings";
 import { resolveMockCRMRequest } from "@/lib/api/mock-crm";
 import { resolveMockEventsRequest } from "@/lib/api/mock-events";
 import { resolveMockMarketplaceRequest } from "@/lib/api/mock-marketplace";
@@ -66,6 +67,10 @@ async function resolveLocalMockRequest<TData>(path: string, method: string, body
 
   if (path.startsWith("/api/marketplace")) {
     return resolveMockMarketplaceRequest<TData>(path, method);
+  }
+
+  if (path.startsWith("/api/bookings")) {
+    return resolveMockBookingsRequest<TData>(path, method, body);
   }
 
   if (path.startsWith("/api/crm")) {
