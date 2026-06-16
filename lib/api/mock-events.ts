@@ -111,7 +111,7 @@ let events: MockEvent[] = [
 ];
 
 let media: MockEventMedia[] = [];
-let guests: MockEventGuest[] = [
+const guests: MockEventGuest[] = [
   {
     id: "guest-001",
     eventId: "evt-001",
