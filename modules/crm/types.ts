@@ -68,3 +68,41 @@ export interface CRMBoard {
   stages: PipelineStage[];
   leads: Lead[];
 }
+
+export interface CreateLeadInput {
+  tenantId: string;
+  ownerId: string;
+  stageId: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  companyName?: string;
+  eventType?: string;
+  eventDate?: string;
+  estimatedValue: number;
+  currency: "PKR";
+  source: LeadSource;
+  status?: LeadStatus;
+}
+
+export type UpdateLeadInput = Partial<
+  Pick<
+    Lead,
+    | "ownerId"
+    | "stageId"
+    | "name"
+    | "email"
+    | "phone"
+    | "companyName"
+    | "eventType"
+    | "eventDate"
+    | "estimatedValue"
+    | "source"
+    | "status"
+    | "lastContactedAt"
+  >
+>;
+
+export interface MoveLeadStageInput {
+  stageId: PipelineStage["id"];
+}

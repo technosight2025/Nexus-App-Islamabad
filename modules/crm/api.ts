@@ -1,5 +1,15 @@
 import { ApiError, apiRequest, type ApiResponse } from "@/lib/api";
-import type { CRMBoard, CRMNote, Lead, LeadFilters, PipelineStage, Task } from "@/modules/crm/types";
+import type {
+  CreateLeadInput,
+  CRMBoard,
+  CRMNote,
+  Lead,
+  LeadFilters,
+  MoveLeadStageInput,
+  PipelineStage,
+  Task,
+  UpdateLeadInput,
+} from "@/modules/crm/types";
 
 const CRM_BASE_PATH = "/api/crm";
 
@@ -52,6 +62,21 @@ export async function getLeads(filters: LeadFilters = {}): Promise<CRMApiState<L
   );
 }
 
+export async function createLead(data: CreateLeadInput): Promise<CRMApiState<Lead>> {
+  const validationError = validateCreateLeadInput(data);
+
+  if (validationError) {
+    return validationError;
+  }
+
+  return executeCRMRequest(
+    apiRequest<Lead>(`${CRM_BASE_PATH}/leads`, {
+      body: data,
+      method: "POST",
+    }),
+  );
+}
+
 export async function getLeadById(id: string): Promise<CRMApiState<Lead>> {
   const leadId = id.trim();
 
@@ -67,6 +92,50 @@ export async function getLeadById(id: string): Promise<CRMApiState<Lead>> {
   return executeCRMRequest(
     apiRequest<Lead>(`${CRM_BASE_PATH}/leads/${encodeURIComponent(leadId)}`, {
       method: "GET",
+    }),
+  );
+}
+
+export async function updateLead(id: string, data: UpdateLeadInput): Promise<CRMApiState<Lead>> {
+  const leadId = id.trim();
+
+  if (!leadId) {
+    return createCRMFailure("Lead id is required.", 400);
+  }
+
+  if (Object.keys(data).length === 0) {
+    return createCRMFailure("At least one lead field is required to update.", 400);
+  }
+
+  return executeCRMRequest(
+    apiRequest<Lead>(`${CRM_BASE_PATH}/leads/${encodeURIComponent(leadId)}`, {
+      body: data,
+      method: "PATCH",
+    }),
+  );
+}
+
+export async function moveLeadStage(
+  id: string,
+  stage: MoveLeadStageInput["stageId"],
+): Promise<CRMApiState<Lead>> {
+  const leadId = id.trim();
+  const stageId = stage.trim();
+
+  if (!leadId) {
+    return createCRMFailure("Lead id is required.", 400);
+  }
+
+  if (!stageId) {
+    return createCRMFailure("Pipeline stage id is required.", 400);
+  }
+
+  const payload: MoveLeadStageInput = { stageId };
+
+  return executeCRMRequest(
+    apiRequest<Lead>(`${CRM_BASE_PATH}/leads/${encodeURIComponent(leadId)}/stage`, {
+      body: payload,
+      method: "PATCH",
     }),
   );
 }
@@ -156,4 +225,37 @@ function toApiError(error: unknown) {
   }
 
   return new ApiError("Unexpected CRM API error.", 500);
+}
+
+function validateCreateLeadInput(data: CreateLeadInput): CRMApiFailure | undefined {
+  if (!data.tenantId.trim()) {
+    return createCRMFailure("Tenant id is required.", 400);
+  }
+
+  if (!data.ownerId.trim()) {
+    return createCRMFailure("Owner id is required.", 400);
+  }
+
+  if (!data.stageId.trim()) {
+    return createCRMFailure("Pipeline stage id is required.", 400);
+  }
+
+  if (!data.name.trim()) {
+    return createCRMFailure("Lead name is required.", 400);
+  }
+
+  if (!Number.isFinite(data.estimatedValue) || data.estimatedValue < 0) {
+    return createCRMFailure("Estimated value must be a valid positive amount.", 400);
+  }
+
+  return undefined;
+}
+
+function createCRMFailure(message: string, status: number): CRMApiFailure {
+  return {
+    data: null,
+    error: new ApiError(message, status),
+    isLoading: false,
+    status: "error",
+  };
 }

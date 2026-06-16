@@ -1,6 +1,16 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { crmService } from "@/modules/crm/service";
-import type { LeadFilters } from "@/modules/crm/types";
+import type { CreateLeadInput, LeadFilters, MoveLeadStageInput, UpdateLeadInput } from "@/modules/crm/types";
+
+interface UpdateLeadVariables {
+  id: string;
+  data: UpdateLeadInput;
+}
+
+interface MoveLeadStageVariables {
+  id: string;
+  stage: MoveLeadStageInput["stageId"];
+}
 
 export const crmQueryKeys = {
   all: ["crm"] as const,
@@ -67,4 +77,37 @@ export function useCRMPipelineStages() {
 
 export function useCRMLeadTasks(leadId: string) {
   return useQuery(crmQueryOptions.tasks(leadId));
+}
+
+export function useCreateCRMLead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateLeadInput) => crmService.createLead(data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: crmQueryKeys.all });
+    },
+  });
+}
+
+export function useUpdateCRMLead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: UpdateLeadVariables) => crmService.updateLead(id, data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: crmQueryKeys.all });
+    },
+  });
+}
+
+export function useMoveCRMLeadStage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, stage }: MoveLeadStageVariables) => crmService.moveLeadStage(id, stage),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: crmQueryKeys.all });
+    },
+  });
 }

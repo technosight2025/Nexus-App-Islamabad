@@ -1,13 +1,26 @@
 import {
+  createLead as createLeadRequest,
   getCRMBoard,
   getLeadById,
   getLeadNotes,
   getLeads,
   getLeadTasks,
   getPipelineStages,
+  moveLeadStage as moveLeadStageRequest,
+  updateLead as updateLeadRequest,
   type CRMApiState,
 } from "@/modules/crm/api";
-import type { CRMBoard, CRMNote, Lead, LeadFilters, PipelineStage, Task } from "@/modules/crm/types";
+import type {
+  CreateLeadInput,
+  CRMBoard,
+  CRMNote,
+  Lead,
+  LeadFilters,
+  MoveLeadStageInput,
+  PipelineStage,
+  Task,
+  UpdateLeadInput,
+} from "@/modules/crm/types";
 
 export const crmService = {
   async getBoard(filters: LeadFilters = {}): Promise<CRMBoard> {
@@ -18,8 +31,20 @@ export const crmService = {
     return unwrapCRMState(await getLeads(filters));
   },
 
+  async createLead(data: CreateLeadInput): Promise<Lead> {
+    return unwrapCRMState(await createLeadRequest(data));
+  },
+
   async getLead(id: string): Promise<Lead> {
     return unwrapCRMState(await getLeadById(id));
+  },
+
+  async updateLead(id: string, data: UpdateLeadInput): Promise<Lead> {
+    return unwrapCRMState(await updateLeadRequest(id, data));
+  },
+
+  async moveLeadStage(id: string, stage: MoveLeadStageInput["stageId"]): Promise<Lead> {
+    return unwrapCRMState(await moveLeadStageRequest(id, stage));
   },
 
   async listPipelineStages(): Promise<PipelineStage[]> {
